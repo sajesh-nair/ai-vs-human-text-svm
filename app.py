@@ -202,18 +202,16 @@ if analyze_btn and user_text.strip():
     ]
     has_ai_keywords = any(keyword in user_text.lower() for keyword in ai_vocab)
     
-    # --- HYBRID SPATIAL MAPPING ENGINE ---
-    # Combines linguistic anchors, formatting profiles, and geometric variance anomalies
-    is_structurally_synthetic = (
-        has_ai_keywords or 
-        hashtag_count > 2 or 
-        emoji_count > 1 or 
-        (len(sentences) > 2 and len_variance < 14.0)
-    )
+    # --- TRI-TIERED HYBRID SPATIAL MAPPING ENGINE ---
+    is_hard_corporate_ai = hashtag_count > 2 or emoji_count > 1
     
-    if is_structurally_synthetic:
-        # Pull coordinates down tightly into the synthetic baseline cluster zone
+    if is_hard_corporate_ai:
+        # Maps confidently low into the synthetic baseline cluster zone
         sim_perp = 34.0 + (unique_words_pct * 12.0)
+    elif has_ai_keywords or (len(sentences) > 2 and len_variance < 14.0):
+        # AMBIGUITY CORRIDOR: Place it near the SVM hyperplane boundary line
+        # This intentionally drops the point in the buffer zone to trigger the cloud intercept pass
+        sim_perp = 58.0 + (unique_words_pct * 8.0)
     else:
         # High structural variance / organic complexity layout
         sim_perp = 78.0 + (unique_words_pct * 18.0)
@@ -223,7 +221,7 @@ if analyze_btn and user_text.strip():
     distance_to_hyperplane = abs(model.decision_function(transformed_metrics)[0])
     local_svm_pred = model.predict(transformed_metrics)[0]
     
-    # Dynamic Ambiguity Window Tracker (Expanded to handle subtle distribution anomalies)
+    # Dynamic Ambiguity Window Tracker (Configured to secure high semantic capture)
     is_ambiguous = distance_to_hyperplane < 0.85
     
     final_pred = local_svm_pred
