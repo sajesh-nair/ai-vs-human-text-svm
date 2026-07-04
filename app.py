@@ -139,10 +139,6 @@ Z = Z.reshape(xx.shape)
 st.subheader("Inference Sandbox")
 col_input, col_metrics = st.columns([2, 1])
 
-# Initialize the text input tracking key if it doesn't exist
-if "sandbox_text" not in st.session_state:
-    st.session_state.sandbox_text = ""
-
 # Define a clean callback function to handle state mutations safely BEFORE rerun
 def execute_clear_callback():
     st.session_state.sandbox_text = ""
@@ -162,14 +158,13 @@ with col_input:
     with btn_col1:
         analyze_btn = st.button("Execute Vector Routing Analysis", type="primary", use_container_width=True)
     with btn_col2:
-        # Attach the callback function here so it triggers safely on click
         st.button("Clear", type="secondary", use_container_width=True, on_click=execute_clear_callback)
 
-    with col_metrics:
-        st.markdown("<p style='font-size: 0.9rem; color: #9ca3af; margin-bottom: 0.5rem;'>System Telemetry</p>", unsafe_allow_html=True)
-        m1, m2 = st.columns(2)
-        m1.metric("Dataset Base Points", len(X))
-        m2.metric("Support Vectors", len(sv_indices))
+with col_metrics:
+    st.markdown("<p style='font-size: 0.9rem; color: #9ca3af; margin-bottom: 0.5rem;'>System Telemetry</p>", unsafe_allow_html=True)
+    m1, m2 = st.columns(2)
+    m1.metric("Dataset Base Points", len(X))
+    m2.metric("Support Vectors", len(sv_indices))
 
     # Cost Telemetry Panel
     st.markdown("<p style='font-size: 0.9rem; color: #9ca3af; margin-top: 0.8rem; margin-bottom: 0.5rem;'>Infrastructure Savings Engine</p>", unsafe_allow_html=True)
@@ -189,24 +184,47 @@ if analyze_btn and user_text.strip():
     
     avg_len = len(words) / max(len(sentences), 1)
     
-    # Clean Deterministic Feature Estimation based on Lexical Complexity Analysis
+    # --- PROVENANCE FEATURE EXTRACTION MATRICES ---
     unique_words_pct = len(set(w.lower() for w in words)) / max(len(words), 1)
+    sentence_lengths = [len(s.split()) for s in sentences]
+    len_variance = np.var(sentence_lengths) if len(sentences) > 1 else 0
     
-    # Map raw text metrics directly to baseline scale properties
-    if any(keyword in user_text.lower() for keyword in ["honestly", "game-changer", "optimization", "leveraging", "ecosystem"]):
-        # High stylistic symmetry / low perplexity markers typical of complex AI simulation
-        sim_perp = 35.0 + (unique_words_pct * 10.0)
+    # Structural Markers (Hashtag and Emoji Spikes)
+    hashtag_count = user_text.count("#")
+    target_emojis = ["🚀", "🗣️", "📌", "💼", "💡", "🤖", "✨", "📊", "✅", "🔥"]
+    emoji_count = sum(1 for char in user_text if char in target_emojis)
+    
+    # Stylistic / Structural Vocab Anchors
+    ai_vocab = [
+        "honestly", "game-changer", "optimization", "leveraging", "ecosystem", 
+        "transformation", "digital transformation", "delve", "testament", 
+        "furthermore", "moreover", "streamline", "landscape", "pioneering"
+    ]
+    has_ai_keywords = any(keyword in user_text.lower() for keyword in ai_vocab)
+    
+    # --- HYBRID SPATIAL MAPPING ENGINE ---
+    # Combines linguistic anchors, formatting profiles, and geometric variance anomalies
+    is_structurally_synthetic = (
+        has_ai_keywords or 
+        hashtag_count > 2 or 
+        emoji_count > 1 or 
+        (len(sentences) > 2 and len_variance < 14.0)
+    )
+    
+    if is_structurally_synthetic:
+        # Pull coordinates down tightly into the synthetic baseline cluster zone
+        sim_perp = 34.0 + (unique_words_pct * 12.0)
     else:
-        # High entropy human structural profiles
-        sim_perp = 75.0 + (unique_words_pct * 20.0)
+        # High structural variance / organic complexity layout
+        sim_perp = 78.0 + (unique_words_pct * 18.0)
 
     # Scaled Coordinate Mapping Engine
     transformed_metrics = scaler.transform([[avg_len, sim_perp]])
     distance_to_hyperplane = abs(model.decision_function(transformed_metrics)[0])
     local_svm_pred = model.predict(transformed_metrics)[0]
     
-    # Variable decision margin boundary width tracker
-    is_ambiguous = distance_to_hyperplane < 0.65
+    # Dynamic Ambiguity Window Tracker (Expanded to handle subtle distribution anomalies)
+    is_ambiguous = distance_to_hyperplane < 0.85
     
     final_pred = local_svm_pred
     engine_source = "Calculated via Local SVM Geometric Structural Engine"
@@ -221,14 +239,14 @@ if analyze_btn and user_text.strip():
                         "content": (
                             "You are an elite NLP text detector specializing in identifying AI-generated content.\n\n"
                             "CRITICAL DETECTOR LOGIC:\n"
-                            "Modern LLMs are frequently prompted to write in a highly casual, relaxed 'human' tone using developer slang, "
-                            "contractions (e.g., 'super smooth', 'game-changer', 'out of the box'), and friendly conversational hooks.\n\n"
-                            "Do NOT be fooled by conversational filler or technical context like mentioning course weeks (e.g., 'Week 7'). "
-                            "Instead, evaluate the deeper structural rhythm. If the text reads with an artificially optimized narrative arc, "
-                            "flawless internal coherence, or relies heavily on smooth, repetitive transitional flows despite using casual vocabulary, "
+                            "Modern LLMs are frequently prompted to write corporate press updates, technical summaries, or casual "
+                            "developer thoughts. They often use clean structures, promotional emojis (e.g. 🚀, 💼, 📌), "
+                            "and dense lists of trending hashtags at the end.\n\n"
+                            "Evaluate the internal coherence and structural regularity. If the text displays a uniform distribution "
+                            "of sentence structures, lacks organic grammatical asymmetry, or relies on standardized promotional transitions, "
                             "flag it strictly as AI.\n\n"
-                            "Only classify as HUMAN if the text shows genuine organic messiness—abrupt stream-of-consciousness logic shifts, "
-                            "awkward phrasing, or authentic, unpolished human quirks.\n\n"
+                            "Only classify as HUMAN if the text presents authentic structural variance—uneven formatting, "
+                            "idiosyncratic prose rhythm, conversational imperfections, or highly chaotic topic-shift markers.\n\n"
                             "Respond strictly in this format:\n"
                             "RESULT: [AI or HUMAN]\n"
                             "REASON: [Your short one-sentence explanation]"
