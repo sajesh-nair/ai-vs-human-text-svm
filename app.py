@@ -34,7 +34,7 @@ st.markdown(
 
 st.title("Hyperplane Studio: Hybrid Text Classification Engine")
 st.markdown(
-    "Advanced Capstone Framework | Multi-tiered heuristic boundary analysis utilizing local Support Vector Machines and deep cloud LLM telemetry."
+    "A smart text classification pipeline that runs fast local SVM boundaries on your device and routes complex edge cases to cloud LLMs only when needed to save compute budget."
 )
 st.write("---")
 
