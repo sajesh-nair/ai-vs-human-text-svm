@@ -1,3 +1,12 @@
-Most AI detectors are completely broken because they rely on a single, inefficient line of defense. Standard mathematical models look at shallow metrics and miss deep context, while routing every single text check to a massive cloud AI is painfully slow and burns through server budgets instantly. For Week 7, I engineered Hyperplane Studio to solve this bottleneck by pairing a high-speed local Support Vector Machine (SVM) with real-time cloud routing via Groq.
+If you want to test AI vs. Human text yourself, I just dropped the interactive links to my new dashboard, Hyperplane Studio, in the comments. (Note: You'll just need to open the sidebar and drop in your Groq API key to test the cloud tier!)
 
-The local SVM solves the performance bottleneck by drawing a smart mathematical boundary line using the most critical data anchors—the yellow support vectors you see on the chart below. It instantly catches obvious green human text or red AI synthetics locally on the device, while the blue dashed lines display the model's live decision fence. If a tricky sentence falls right on that fence line, the system flags the edge case and routes only that specific text to a heavyweight cloud AI for deep validation—maximizing accuracy while deflecting infrastructure costs to save up to 100% of the cloud API budget
+Running every text check through a cloud LLM is a massive waste of money and kills response times, but basic keywords miss the context entirely.
+
+For Week 7 of my project series, I built a hybrid architecture to fix this.
+
+The app uses a local Support Vector Machine (SVM) trained on Kaggle's AI-Generated Text Detection (Multi-Model) dataset. Running on-device, the SVM acts as a high-speed classifier to instantly catch the clear-cut cases for zero API cost. The system only escalates to Llama (via Groq) if a text profile lands right in the borderline zone near the SVM's mathematical decision boundary.
+
+The Stack: Python, Scikit-Learn, Streamlit, Groq.
+
+Check out the links below!
+https://ai-vs-human-text-svm.streamlit.app/
