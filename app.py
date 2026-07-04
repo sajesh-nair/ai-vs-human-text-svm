@@ -139,7 +139,17 @@ Z = Z.reshape(xx.shape)
 st.subheader("Inference Sandbox")
 col_input, col_metrics = st.columns([2, 1])
 
+# Initialize the text input tracking key if it doesn't exist
+if "sandbox_text" not in st.session_state:
+    st.session_state.sandbox_text = ""
+
+# Define a clean callback function to handle state mutations safely BEFORE rerun
+def execute_clear_callback():
+    st.session_state.sandbox_text = ""
+    st.session_state.last_prediction = None
+
 with col_input:
+    # Bind the text area directly to session state via the 'key' parameter
     user_text = st.text_area(
         "Input source paragraphs for structural mapping analysis:",
         placeholder="Provide input text block...",
@@ -147,24 +157,20 @@ with col_input:
         key="sandbox_text"
     )
     
-    # Dual-Action Core Command Layout
+    # Create side-by-side action buttons using columns
     btn_col1, btn_col2, _ = st.columns([3, 1, 4])
     with btn_col1:
         analyze_btn = st.button("Execute Vector Routing Analysis", type="primary", use_container_width=True)
     with btn_col2:
-        clear_btn = st.button("Clear", type="secondary", use_container_width=True)
-        
-    if clear_btn:
-        st.session_state.sandbox_text = ""
-        st.session_state.last_prediction = None
-        st.rerun()
+        # Attach the callback function here so it triggers safely on click
+        st.button("Clear", type="secondary", use_container_width=True, on_click=execute_clear_callback)
 
-with col_metrics:
-    st.markdown("<p style='font-size: 0.9rem; color: #9ca3af; margin-bottom: 0.5rem;'>System Telemetry</p>", unsafe_allow_html=True)
-    m1, m2 = st.columns(2)
-    m1.metric("Dataset Base Points", len(X))
-    m2.metric("Support Vectors", len(sv_indices))
-    
+    with col_metrics:
+        st.markdown("<p style='font-size: 0.9rem; color: #9ca3af; margin-bottom: 0.5rem;'>System Telemetry</p>", unsafe_allow_html=True)
+        m1, m2 = st.columns(2)
+        m1.metric("Dataset Base Points", len(X))
+        m2.metric("Support Vectors", len(sv_indices))
+
     # Cost Telemetry Panel
     st.markdown("<p style='font-size: 0.9rem; color: #9ca3af; margin-top: 0.8rem; margin-bottom: 0.5rem;'>Infrastructure Savings Engine</p>", unsafe_allow_html=True)
     c1, c2 = st.columns(2)
