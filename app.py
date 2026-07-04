@@ -43,6 +43,10 @@ if "local_deflections" not in st.session_state:
     st.session_state.local_deflections = 0
 if "cloud_routing_passes" not in st.session_state:
     st.session_state.cloud_routing_passes = 0
+if "last_prediction" not in st.session_state:
+    st.session_state.last_prediction = None
+if "sandbox_text" not in st.session_state:
+    st.session_state.sandbox_text = ""
 
 # --- SIDEBAR: PIPELINE CONFIGURATION ---
 st.sidebar.header("Hyperparameter Configuration")
@@ -108,7 +112,6 @@ model.fit(X_scaled, y)
 sv_indices = model.support_
 sv_coords = X_scaled[sv_indices]
 
-# HOISTED FUNCTION: Declared before data compilation loop to prevent NameErrors
 def is_support_vector(coord):
     return any(np.allclose(coord, sv, atol=1e-4) for sv in sv_coords)
 
@@ -128,7 +131,7 @@ for idx, coord in enumerate(X_scaled):
 # Generate Decision Boundary Space Contour Contained Vectors
 x_min, x_max = X_scaled[:, 0].min() - 0.5, X_scaled[:, 0].max() + 0.5
 y_min, y_max = X_scaled[:, 1].min() - 0.5, X_scaled[:, 1].max() + 0.5
-xx, yy = np.meshgrid(np.linspace(x_min, x_max, 30), np.linspace(y_min, y_max, 30))
+xx, yy = np.meshgrid(np.linspace(x_min, x_max, 40), np.linspace(y_min, y_max, 40))
 Z = model.decision_function(np.c_[xx.ravel(), yy.ravel()])
 Z = Z.reshape(xx.shape)
 
@@ -141,7 +144,20 @@ with col_input:
         "Input source paragraphs for structural mapping analysis:",
         placeholder="Provide input text block...",
         height=220,
+        key="sandbox_text"
     )
+    
+    # Dual-Action Core Command Layout
+    btn_col1, btn_col2, _ = st.columns([3, 1, 4])
+    with btn_col1:
+        analyze_btn = st.button("Execute Vector Routing Analysis", type="primary", use_container_width=True)
+    with btn_col2:
+        clear_btn = st.button("Clear", type="secondary", use_container_width=True)
+        
+    if clear_btn:
+        st.session_state.sandbox_text = ""
+        st.session_state.last_prediction = None
+        st.rerun()
 
 with col_metrics:
     st.markdown("<p style='font-size: 0.9rem; color: #9ca3af; margin-bottom: 0.5rem;'>System Telemetry</p>", unsafe_allow_html=True)
@@ -159,40 +175,36 @@ with col_metrics:
     c2.metric("API Budget Saved", f"{savings_pct:.1f}%")
 
 live_series = []
-if user_text.strip():
-    # Defensive text verification preprocessing
+
+# Action execution boundary
+if analyze_btn and user_text.strip():
     words = user_text.split()
     sentences = [s.strip() for s in user_text.replace("\n", ".").replace(":", ".").split(".") if s.strip()]
     
     avg_len = len(words) / max(len(sentences), 1)
-    sentence_lengths = [len(s.split()) for s in sentences]
-    len_variance = np.var(sentence_lengths) if len(sentences) > 1 else 0
     
-    # Core Heuristic Calculation 
-    has_bracket_patterns = "(" in user_text and ")" in user_text
-    has_hashtags = "#" in user_text
-    has_project_hook = "week " in user_text.lower() or "project" in user_text.lower()
+    # Clean Deterministic Feature Estimation based on Lexical Complexity Analysis
+    unique_words_pct = len(set(w.lower() for w in words)) / max(len(words), 1)
     
-    if (has_bracket_patterns and has_hashtags) or (has_project_hook and len_variance < 15):
-        sim_perp = 36.0 + np.random.normal(0, 1)
-        heuristic_pred = 1
+    # Map raw text metrics directly to baseline scale properties
+    if any(keyword in user_text.lower() for keyword in ["honestly", "game-changer", "optimization", "leveraging", "ecosystem"]):
+        # High stylistic symmetry / low perplexity markers typical of complex AI simulation
+        sim_perp = 35.0 + (unique_words_pct * 10.0)
     else:
-        sim_perp = 84.0 + np.random.normal(0, 2)
-        heuristic_pred = 0
+        # High entropy human structural profiles
+        sim_perp = 75.0 + (unique_words_pct * 20.0)
 
-    final_pred = heuristic_pred
-    engine_source = "Calculated via Local SVM Geometric Structural Engine"
-    is_ambiguous = False
-
-    # Check proximity to optimized mathematical hyperplane to identify edge cases
+    # Scaled Coordinate Mapping Engine
     transformed_metrics = scaler.transform([[avg_len, sim_perp]])
     distance_to_hyperplane = abs(model.decision_function(transformed_metrics)[0])
+    local_svm_pred = model.predict(transformed_metrics)[0]
     
-    # Trigger cloud interception if point resides near the margin buffers
-    if distance_to_hyperplane < 0.4:
-        is_ambiguous = True
-
-    # Multi-Tiered Routing Logic Execution
+    # Variable decision margin boundary width tracker
+    is_ambiguous = distance_to_hyperplane < 0.65
+    
+    final_pred = local_svm_pred
+    engine_source = "Calculated via Local SVM Geometric Structural Engine"
+    
     if is_ambiguous and user_groq_key.strip():
         try:
             client = Groq(api_key=user_groq_key)
@@ -225,27 +237,34 @@ if user_text.strip():
             
             if "RESULT: AI" in response_text.upper():
                 final_pred = 1
-                sim_perp = 32.0 + np.random.normal(0, 1)
-                engine_source = f"[Cloud Validation Pass] " + response_text.replace("RESULT: AI", "").replace("RESULT:", "").strip().lstrip('\n- ')
+                engine_source = f"[Cloud Validation Pass Intercept] " + response_text.replace("RESULT: AI", "").replace("RESULT:", "").strip().lstrip('\n- ')
             else:
                 final_pred = 0
-                sim_perp = 86.0 + np.random.normal(0, 1)
-                engine_source = f"[Cloud Validation Pass] " + response_text.replace("RESULT: HUMAN", "").replace("RESULT:", "").strip().lstrip('\n- ')
+                engine_source = f"[Cloud Validation Pass Intercept] " + response_text.replace("RESULT: HUMAN", "").replace("RESULT:", "").strip().lstrip('\n- ')
             
             st.session_state.cloud_routing_passes += 1
                 
         except Exception as e:
-            st.error(f"Distributed Pipeline Exception: Validating parameters failed. Technical trace: {str(e)}")
+            st.error(f"Distributed Pipeline Exception: Technical trace: {str(e)}")
             st.session_state.local_deflections += 1
     else:
         st.session_state.local_deflections += 1
 
-    # Recalculate spatial plot coordinates after optimization pass
-    live_point = scaler.transform([[avg_len, sim_perp]])
-    
+    # Store current inference snapshot into transient state memory
+    st.session_state.last_prediction = {
+        "final_pred": final_pred,
+        "engine_source": engine_source,
+        "coord_x": float(transformed_metrics[0][0]),
+        "coord_y": float(transformed_metrics[0][1])
+    }
+    st.rerun()
+
+# Persist last computed point to prevent graphical flicker during variable adjustments
+if st.session_state.last_prediction is not None:
+    snapshot = st.session_state.last_prediction
     st.write("---")
     
-    if final_pred == 1:
+    if snapshot["final_pred"] == 1:
         st.markdown(
             '<div style="background-color: #2d1a22; border: 1px solid #ef4444; padding: 1rem; border-radius: 6px;">'
             '<span style="color: #ef4444; font-weight: bold; letter-spacing: 0.05em;">CLASSIFICATION: ARTIFICIAL SYNTHETIC SIGNATURE DETECTED</span>'
@@ -262,7 +281,7 @@ if user_text.strip():
         )
         pred_label = "HUMAN SOURCE"
         
-    st.markdown(f"<p style='font-size: 0.85rem; color: #9ca3af; margin-top: 0.5rem;'>Pipeline Diagnostics: {engine_source}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='font-size: 0.85rem; color: #9ca3af; margin-top: 0.5rem;'>Pipeline Diagnostics: {snapshot['engine_source']}</p>", unsafe_allow_html=True)
 
     live_series = [
         {
@@ -270,11 +289,11 @@ if user_text.strip():
             "type": "scatter",
             "data": [
                 {
-                    "value": [float(live_point[0][0]), float(live_point[0][1])],
+                    "value": [snapshot["coord_x"], snapshot["coord_y"]],
                     "symbol": "diamond",
                     "symbolSize": 16,
                     "itemStyle": {
-                        "color": "#ec4899" if final_pred == 1 else "#3b82f6",
+                        "color": "#ec4899" if snapshot["final_pred"] == 1 else "#3b82f6",
                         "borderColor": "#ffffff",
                         "borderWidth": 2,
                         "shadowBlur": 10,
@@ -288,12 +307,11 @@ if user_text.strip():
 # --- HIGH-FIDELITY DESIGN SPACE VISUALIZER ---
 st.subheader("Decision Space Visualizer")
 
-# Format contour coordinates into ECharts line series arrays
 contour_lines = []
 for i in range(Z.shape[0]):
     contour_data = []
     for j in range(Z.shape[1]):
-        if abs(Z[i, j]) < 0.3:
+        if abs(Z[i, j]) < 0.25:
             contour_data.append([float(xx[i, j]), float(yy[i, j])])
     if len(contour_data) > 1:
         contour_lines.append({
