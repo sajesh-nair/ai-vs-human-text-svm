@@ -201,13 +201,16 @@ if user_text.strip():
                     {
                         "role": "system",
                         "content": (
-                            "You are an elite NLP text detector specializing in identifying AI-generated content. "
-                            "Analyze the text for structural templates common to LLMs. "
-                            "CRITICAL NUANCE: Technical jargon, programming questions, or mentioning a course week (e.g., 'Week 7') "
-                            "does NOT inherently mean it is AI. Humans writing tech blogs use these phrases naturally. "
-                            "ONLY flag as AI if the tone exhibits robotic symmetry: perfectly balanced transitional phrases, "
-                            "an unnaturally formal/sanitized delivery, or a corporate-style call-to-action bullet block at the end. "
-                            "If the text uses casual phrasing, contractions, or informal sentence lengths alongside technical terms, classify as HUMAN.\n\n"
+                            "You are an elite NLP text detector specializing in identifying AI-generated content.\n\n"
+                            "CRITICAL DETECTOR LOGIC:\n"
+                            "Modern LLMs are frequently prompted to write in a highly casual, relaxed 'human' tone using developer slang, "
+                            "contractions (e.g., 'super smooth', 'game-changer', 'out of the box'), and friendly conversational hooks.\n\n"
+                            "Do NOT be fooled by conversational filler or technical context like mentioning course weeks (e.g., 'Week 7'). "
+                            "Instead, evaluate the deeper structural rhythm. If the text reads with an artificially optimized narrative arc, "
+                            "flawless internal coherence, or relies heavily on smooth, repetitive transitional flows despite using casual vocabulary, "
+                            "flag it strictly as AI.\n\n"
+                            "Only classify as HUMAN if the text shows genuine organic messiness—abrupt stream-of-consciousness logic shifts, "
+                            "awkward phrasing, or authentic, unpolished human quirks.\n\n"
                             "Respond strictly in this format:\n"
                             "RESULT: [AI or HUMAN]\n"
                             "REASON: [Your short one-sentence explanation]"
